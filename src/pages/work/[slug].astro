@@ -1,0 +1,115 @@
+---
+/*
+  One project.
+
+  Full-bleed cover, then the written piece beside the facts, then the plates.
+  The pager at the bottom is the only navigation offered — an architecture
+  index is meant to be walked through, not searched.
+*/
+import Base from '../_components/Base.astro';
+import Figure from '../_components/Figure.astro';
+import { projects } from '../_data/projects.ts';
+import { hasAsset } from '../_data/assets.ts';
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const project = projects.find((p) => p.slug === slug)!;
+
+const i = projects.findIndex((p) => p.slug === slug);
+const next = projects[(i + 1) % projects.length];
+const prev = projects[(i - 1 + projects.length) % projects.length];
+
+/*
+  Only ever render frames that exist. The establishing shots for some projects
+  have not been generated yet, and a hero made of hatched placeholder was the
+  bug this replaces — a missing slot should cost nothing, not a full screen.
+*/
+const available = project.shots.filter((s) => hasAsset(s.file));
+const heroFile = hasAsset(project.cover) ? project.cover : available[0]?.file;
+const plates = available.filter((s) => s.file !== heroFile);
+const [wide, ...rest] = plates;
+---
+
+<Base title={project.name} current="work" description={project.lede}>
+  <!-- Cover -->
+  <section class="hero">
+    <Figure file={heroFile} ratio="auto" eager alt={`${project.name}, ${project.place}`} />
+    <div class="hero-shade"></div>
+    <div class="hero-copy">
+      <div>
+        <p class="label">{project.type} &mdash; {project.place}</p>
+        <h1 class="display">{project.name}</h1>
+      </div>
+      <div class="hero-meta">
+        {project.status === 'Completed' ? `Completed ${project.year}` : `${project.status}, ${project.year}`}<br />
+        {project.area}
+      </div>
+    </div>
+  </section>
+
+  <!-- The piece -->
+  <section class="wrap section">
+    <div class="two">
+      <p class="lede" data-reveal>{project.lede}</p>
+      <div class="body-col">
+        {project.brief.map((p, n) => (
+          <p data-reveal data-delay={String(Math.min(n, 3))}>{p}</p>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Facts -->
+  <section class="wrap section-tight">
+    <div class="facts">
+      {project.facts.map((f, n) => (
+        <div data-reveal data-delay={String(Math.min(n, 3))}>
+          <div class="fact-l">{f.label}</div>
+          <div class="fact-v">{f.value}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Plates -->
+  <section class="wrap section-tight">
+    <div class="plates">
+      {wide && (
+        <Figure
+          file={wide.file}
+          ratio={wide.ratio}
+          caption={wide.caption}
+          class="fig-wide"
+          alt={`${project.name} — ${wide.caption}`}
+        />
+      )}
+      {rest.map((s) => (
+        <Figure
+          file={s.file}
+          ratio={s.ratio}
+          caption={s.caption}
+          alt={`${project.name} — ${s.caption}`}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!-- Pager -->
+  <section class="wrap">
+    <div class="pager">
+      <a href={`/work/${prev.slug}`}>
+        <span class="label">Previous</span>
+        <span class="h3">{prev.name}</span>
+      </a>
+      <a href={`/work/${next.slug}`} style="text-align:right">
+        <span class="label">Next</span>
+        <span class="h3">{next.name}</span>
+      </a>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,152 @@
+---
+/*
+  Home.
+
+  Structure borrowed from bloom3d — work first, then what we do, then how, then
+  the numbers, then the questions everyone asks — dressed in designbyad's
+  restraint. Testimonials are deliberately absent: inventing five clients and
+  their faces is the one thing in a concept piece that would actually mislead.
+*/
+import Base from './_components/Base.astro';
+import Figure from './_components/Figure.astro';
+import { studio, services, numbers, approach, faq } from './_data/site.ts';
+import { projects } from './_data/projects.ts';
+
+const featured = projects.slice(0, 3);
+---
+
+<Base title="Architecture and interiors" description={studio.line}>
+  <!-- Hero -->
+  <section class="hero">
+    <Figure file="hero" ratio="auto" eager alt="" />
+    <div class="hero-shade"></div>
+
+    <div class="hero-copy">
+      <div>
+        <p class="label">{studio.discipline} &mdash; {studio.city}</p>
+        <h1 class="display">{studio.line}</h1>
+      </div>
+      <div class="hero-meta">
+        Practising since {studio.founded}<br />
+        Three projects a year<br />
+        Houses, mostly
+      </div>
+    </div>
+  </section>
+
+  <!-- Statement -->
+  <section class="wrap section">
+    <div class="two">
+      <p class="label" data-reveal>The practice</p>
+      <div class="body-col">
+        {studio.intro.map((p, i) => (
+          <p class="h3" style={i === 0 ? 'color:var(--ink)' : ''} data-reveal data-delay={String(i)}>
+            {p}
+          </p>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Selected work -->
+  <section class="wrap section-tight">
+    <div class="two" style="margin-bottom:clamp(24px,4vh,52px)">
+      <p class="label" data-reveal>Selected work</p>
+      <p class="lede" data-reveal data-delay="1">
+        Five of thirty-one. The rest are private.
+      </p>
+    </div>
+
+    <div class="projects stagger">
+      {featured.map((p, i) => (
+        <a class="pcard" href={`/work/${p.slug}`}>
+          <Figure
+            file={p.cover}
+            ratio={i % 2 === 0 ? '3/2' : '4/3'}
+            caption={`${p.name} — ${p.place}`}
+            class="pcard-fig"
+            alt={`${p.name}, ${p.place}`}
+          />
+          <div class="pcard-row">
+            <h2 class="pcard-name">{p.name}</h2>
+            <span class="pcard-meta">{p.place} &middot; {p.year}</span>
+          </div>
+          <p class="pcard-lede">{p.lede}</p>
+        </a>
+      ))}
+    </div>
+
+    <p style="margin-top:clamp(28px,4vh,56px)" data-reveal>
+      <a href="/work" class="h3" style="border-bottom:1px solid var(--line-2)">
+        All projects
+      </a>
+    </p>
+  </section>
+
+  <!-- What we do -->
+  <section class="wrap section">
+    <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
+      <p class="label" data-reveal>What we do</p>
+      <p class="lede" data-reveal data-delay="1">
+        Four things, and nothing else.
+      </p>
+    </div>
+
+    <div class="items">
+      {services.map((s, i) => (
+        <div class="item" data-reveal data-delay={String(Math.min(i, 3))}>
+          <span class="item-n">{s.n}</span>
+          <h3 class="h3">{s.title}</h3>
+          <p class="item-body">{s.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Numbers -->
+  <section class="wrap section-tight">
+    <div class="stats">
+      {numbers.map((n, i) => (
+        <div class="stat" data-reveal data-delay={String(Math.min(i, 3))}>
+          <div class="stat-v">{n.value}</div>
+          <div class="stat-l">{n.label}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- How we work -->
+  <section class="wrap section">
+    <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
+      <p class="label" data-reveal>How we work</p>
+      <p class="lede" data-reveal data-delay="1">
+        The same four steps on every project, in the same order.
+      </p>
+    </div>
+
+    <div class="items">
+      {approach.map((a, i) => (
+        <div class="item" data-reveal data-delay={String(Math.min(i, 3))}>
+          <span class="item-n">{a.n}</span>
+          <h3 class="h3">{a.title}</h3>
+          <p class="item-body">{a.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Questions -->
+  <section class="wrap section">
+    <div class="two">
+      <p class="label" data-reveal>Common questions</p>
+      <div class="faq">
+        {faq.map((f, i) => (
+          <details data-reveal data-delay={String(Math.min(i, 3))} open={i === 0}>
+            <summary>{f.q}</summary>
+            <p class="faq-a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

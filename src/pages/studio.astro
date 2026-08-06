@@ -1,0 +1,90 @@
+---
+/*
+  Studio. The practice, the method, and the numbers — no team headshots, which
+  in a concept piece would mean inventing faces for people who do not exist.
+*/
+import Base from './_components/Base.astro';
+import Figure from './_components/Figure.astro';
+import { studio, approach, numbers, services } from './_data/site.ts';
+---
+
+<Base title="Studio" current="studio" description={studio.intro[0]}>
+  <section class="wrap" style="padding-top:clamp(110px,16vh,190px)">
+    <p class="label" data-reveal>Studio</p>
+    <h1 class="display" data-reveal data-delay="1" style="margin-top:14px;max-width:15ch">
+      {studio.name} &mdash; {studio.meaning}.
+    </h1>
+  </section>
+
+  <section class="wrap section-tight">
+    <div class="two">
+      <div class="body-col">
+        {studio.intro.map((p, i) => (
+          <p class="h3" data-reveal data-delay={String(i)} style="color:var(--ink)">{p}</p>
+        ))}
+      </div>
+      <div class="body-col">
+        <p data-reveal data-delay="1">
+          The name is a Sanskrit word for the space between things &mdash; between two
+          walls, between two seasons, between one room and the next. It is as close as
+          we have come to describing what we actually spend the day on.
+        </p>
+        <p data-reveal data-delay="2">
+          We work from one room in {studio.city} with a long table, a plan chest and
+          more physical models than anyone needs. Drawings stay on paper until they
+          are resolved. Almost everything we get wrong, we get wrong in the first
+          fortnight, and paper is the cheapest place to find that out.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section-tight">
+    <Figure file="studio" ratio="16/9" caption="The long table" alt="The studio" />
+  </section>
+
+  <section class="wrap section">
+    <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
+      <p class="label" data-reveal>Method</p>
+      <p class="lede" data-reveal data-delay="1">
+        The same four steps on every project, in the same order.
+      </p>
+    </div>
+    <div class="items">
+      {approach.map((a, i) => (
+        <div class="item" data-reveal data-delay={String(Math.min(i, 3))}>
+          <span class="item-n">{a.n}</span>
+          <h3 class="h3">{a.title}</h3>
+          <p class="item-body">{a.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap section-tight">
+    <div class="stats">
+      {numbers.map((n, i) => (
+        <div class="stat" data-reveal data-delay={String(Math.min(i, 3))}>
+          <div class="stat-v">{n.value}</div>
+          <div class="stat-l">{n.label}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
+      <p class="label" data-reveal>Services</p>
+      <p class="lede" data-reveal data-delay="1">Four things, and nothing else.</p>
+    </div>
+    <div class="items">
+      {services.map((s, i) => (
+        <div class="item" data-reveal data-delay={String(Math.min(i, 3))}>
+          <span class="item-n">{s.n}</span>
+          <h3 class="h3">{s.title}</h3>
+          <p class="item-body">{s.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>

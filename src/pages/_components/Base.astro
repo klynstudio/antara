@@ -1,0 +1,180 @@
+---
+/*
+  Shell for every Antara page.
+
+  Deliberately does not use the Klyn layout — no loader, no custom cursor, no
+  grain, no Lenis. This is meant to read as a different studio's work, and the
+  restraint is the point: one typeface, one stylesheet, and about forty lines
+  of script for the whole site.
+*/
+import '../_styles/antara.css';
+import { studio, disclosure } from '../_data/site.ts';
+
+export interface Props {
+  title: string;
+  description?: string;
+  current?: 'work' | 'studio' | 'contact' | null;
+}
+
+const { title, description = studio.line, current = null } = Astro.props;
+
+const nav = [
+  { label: 'Projects', href: '/work', key: 'work' },
+  { label: 'Studio', href: '/studio', key: 'studio' },
+  { label: 'Contact', href: '#contact', key: 'contact' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- A concept piece living inside another studio's site; it should not be indexed -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} — {studio.name}</title>
+    <meta name="description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header class="nav" id="nav">
+      <a class="nav-mark" href="/">
+        {studio.name} <span>&mdash; {studio.discipline}</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        {nav.map((n) => (
+          <a href={n.href} aria-current={current === n.key ? 'page' : undefined}>{n.label}</a>
+        ))}
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <section class="cta" id="contact">
+      <div class="wrap section">
+        <p class="label" data-reveal>Contact</p>
+
+        <!--
+          The address gets a row to itself. Inside the two-column grid it was
+          overrunning its column and printing straight through the paragraph
+          beside it — an email is one unbreakable word, so it cannot reflow its
+          way out of a narrow column the way a sentence can.
+        -->
+        <a class="big" href={`mailto:${studio.email}`} data-reveal>{studio.email}</a>
+
+        <div class="cta-cols">
+          <p data-reveal data-delay="1">
+            We answer every enquiry ourselves, usually within two days. If you are
+            deciding whether to build at all, say so &mdash; that is a different
+            and shorter conversation.
+          </p>
+          <p data-reveal data-delay="2">
+            {studio.phone}<br />
+            {studio.city}, {studio.country}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <div class="wrap">
+        <div class="foot-grid">
+          <div>
+            <p class="label">{studio.name}</p>
+            <p style="margin-top:8px">{studio.discipline}<br />Since {studio.founded}</p>
+          </div>
+          <div>
+            <p class="label">Pages</p>
+            <p style="margin-top:8px">
+              <a href="/">Home</a><br />
+              <a href="/work">Projects</a><br />
+              <a href="/studio">Studio</a>
+            </p>
+          </div>
+          <div>
+            <p class="label">Contact</p>
+            <p style="margin-top:8px">
+              <a href={`mailto:${studio.email}`}>{studio.email}</a><br />
+              {studio.phone}
+            </p>
+          </div>
+          <div>
+            <p class="label">Studio</p>
+            <p style="margin-top:8px">{studio.city}<br />{studio.country}</p>
+          </div>
+        </div>
+
+        <div class="foot-note">
+          <span>&copy; {year} {studio.name}</span>
+          <span style="max-width:64ch">{disclosure}</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      /*
+        The entire motion system.
+
+        An IntersectionObserver adds `.in` once, and CSS does the rest — text
+        rises, images wipe. Elements are unobserved as soon as they have played
+        so nothing keeps running behind you.
+      */
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!reduce) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            });
+          },
+          { rootMargin: '0px 0px -12% 0px', threshold: 0.08 }
+        );
+
+        document.querySelectorAll('[data-reveal], [data-fig]').forEach((el) => io.observe(el));
+
+        /*
+          Hide the bar going down, show it coming back. Compared against a
+          stored position rather than a scroll direction event, so a rubber-band
+          at the top of the page cannot leave it stuck off screen.
+        */
+        const nav = document.getElementById('nav');
+        let last = window.scrollY;
+        let ticking = false;
+
+        const onScroll = () => {
+          const y = window.scrollY;
+          if (y > 120 && y > last + 6) nav.classList.add('is-up');
+          else if (y < last - 6 || y < 120) nav.classList.remove('is-up');
+          last = y;
+          ticking = false;
+        };
+
+        window.addEventListener(
+          'scroll',
+          () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(onScroll);
+          },
+          { passive: true }
+        );
+      } else {
+        document.querySelectorAll('[data-reveal], [data-fig]').forEach((el) => el.classList.add('in'));
+      }
+    </script>
+  </body>
+</html>

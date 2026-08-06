@@ -1,0 +1,53 @@
+---
+/*
+  One image slot.
+
+  Looks the file up on disk at build time. If it is there, it renders the
+  picture; if it is not, it renders a labelled placeholder at the same aspect
+  ratio, so the layout can be judged before a single photograph exists and
+  upgrades itself the moment one is dropped in — no code change, no list to
+  update.
+*/
+import { assetFor } from '../_data/assets.ts';
+
+export interface Props {
+  file: string;              // filename without extension, e.g. 'p1-02'
+  alt?: string;
+  caption?: string;
+  ratio?: string;            // any CSS aspect-ratio value
+  sizes?: string;
+  eager?: boolean;
+  class?: string;
+}
+
+const {
+  file,
+  alt = '',
+  caption,
+  ratio = '3/2',
+  sizes = '100vw',
+  eager = false,
+  class: klass = '',
+} = Astro.props;
+
+const src = assetFor(file);
+---
+
+<figure class={`fig ${klass}`} style={`aspect-ratio:${ratio}`} data-fig>
+  {src ? (
+    <img
+      src={src}
+      alt={alt}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={eager ? 'high' : undefined}
+      sizes={sizes}
+    />
+  ) : (
+    <div class="fig-ph" aria-hidden="true">
+      <span>{file}</span>
+      {ratio !== 'auto' && <span>{ratio.replace('/', ':')}</span>}
+    </div>
+  )}
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

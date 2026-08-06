@@ -1,0 +1,21 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# environment
+.env
+.env.production
+
+# Vercel
+.vercel/
+
+# Source photography — hundreds of MB of PNGs straight out of the generator.
+# The processed WebP in public/images/ is what the site serves and what is
+# committed; run `npm run images` to regenerate it from these.
+raw-images/
+
+# OS
+.DS_Store
