@@ -11,21 +11,30 @@ for a real city would be misleading, whatever the disclaimer says.
 
 ## What it is
 
-Five pages of markup, one stylesheet, and about forty lines of JavaScript.
+Five pages of markup, one stylesheet, and one motion script.
 
 - **No framework.** Astro, static output, no client-side library.
 - **No CMS.** The five projects are one TypeScript file.
-- **No motion library.** One `IntersectionObserver`: text rises, images wipe,
-  the nav bar hides going down. That is the entire motion budget, and the
-  restraint is the point — the references this is drawn from carry everything
-  on the photography.
+- **One dependency in the browser: Lenis**, for smooth scrolling. Everything
+  else in `_scripts/motion.ts` is a single `requestAnimationFrame` loop plus an
+  `IntersectionObserver`:
+  - headings rise line by line behind a mask (`data-split`)
+  - photographs open upward and settle, then drift against their frames
+  - the home hero opens from an inset, then crossfades through the covers
+  - selected work is pinned, and vertical scroll drives it sideways
+    (a plain swipe below 900px)
+  - a strip of frames drifts on its own and is pushed along by scroll speed
+  - page changes use cross-document view transitions; a project's cover
+    travels from its card into the project hero
+  - under `prefers-reduced-motion` none of it runs
 
-Roughly 8 kB of CSS and JS over the wire, plus the images.
+Roughly 12 kB of CSS and JS over the wire (gzipped), plus the images.
 
 ```
 src/pages/
   index.astro  work.astro  work/[slug].astro  studio.astro
   _components/   Base.astro  Figure.astro
+  _scripts/      motion.ts
   _data/         projects.ts  site.ts  assets.ts
   _styles/       antara.css
 ```

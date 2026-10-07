@@ -42,3 +42,20 @@ export function assetFor(file: string): string | null {
 }
 
 export const hasAsset = (file: string): boolean => assetFor(file) !== null;
+
+/* A hero film, if one has been dropped into public/video/. WebM first. */
+export function videoFor(file: string): { src: string; type: string }[] {
+  const dir = path.join(process.cwd(), 'public', 'video');
+  return [
+    ['webm', 'video/webm'],
+    ['mp4', 'video/mp4'],
+  ]
+    .filter(([ext]) => {
+      try {
+        return fs.existsSync(path.join(dir, `${file}.${ext}`));
+      } catch {
+        return false;
+      }
+    })
+    .map(([ext, type]) => ({ src: `/video/${file}.${ext}`, type }));
+}

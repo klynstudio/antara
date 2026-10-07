@@ -11,16 +11,14 @@ import { studio, approach, numbers, services } from './_data/site.ts';
 <Base title="Studio" current="studio" description={studio.intro[0]}>
   <section class="wrap" style="padding-top:clamp(110px,16vh,190px)">
     <p class="label" data-reveal>Studio</p>
-    <h1 class="display" data-reveal data-delay="1" style="margin-top:14px;max-width:15ch">
-      {studio.name} &mdash; {studio.meaning}.
-    </h1>
+    <h1 class="display" data-split style="margin-top:14px;max-width:15ch">{`${studio.name} — ${studio.meaning}.`}</h1>
   </section>
 
   <section class="wrap section-tight">
     <div class="two">
       <div class="body-col">
         {studio.intro.map((p, i) => (
-          <p class="h3" data-reveal data-delay={String(i)} style="color:var(--ink)">{p}</p>
+          <p class="h3" data-split style="color:var(--ink)">{p}</p>
         ))}
       </div>
       <div class="body-col">
@@ -46,9 +44,7 @@ import { studio, approach, numbers, services } from './_data/site.ts';
   <section class="wrap section">
     <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
       <p class="label" data-reveal>Method</p>
-      <p class="lede" data-reveal data-delay="1">
-        The same four steps on every project, in the same order.
-      </p>
+      <p class="lede" data-split>The same four steps on every project, in the same order.</p>
     </div>
     <div class="items">
       {approach.map((a, i) => (
@@ -65,7 +61,9 @@ import { studio, approach, numbers, services } from './_data/site.ts';
     <div class="stats">
       {numbers.map((n, i) => (
         <div class="stat" data-reveal data-delay={String(Math.min(i, 3))}>
-          <div class="stat-v">{n.value}</div>
+          <div class="stat-v">
+            {Number(n.value) < 1000 ? <span data-count={n.value}>{n.value}</span> : n.value}
+          </div>
           <div class="stat-l">{n.label}</div>
         </div>
       ))}
@@ -75,7 +73,7 @@ import { studio, approach, numbers, services } from './_data/site.ts';
   <section class="wrap section">
     <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
       <p class="label" data-reveal>Services</p>
-      <p class="lede" data-reveal data-delay="1">Four things, and nothing else.</p>
+      <p class="lede" data-split>Four things, and nothing else.</p>
     </div>
     <div class="items">
       {services.map((s, i) => (

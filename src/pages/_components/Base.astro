@@ -3,9 +3,8 @@
   Shell for every Antara page.
 
   Deliberately does not use the Klyn layout — no loader, no custom cursor, no
-  grain, no Lenis. This is meant to read as a different studio's work, and the
-  restraint is the point: one typeface, one stylesheet, and about forty lines
-  of script for the whole site.
+  grain. This is meant to read as a different studio's work: one typeface, one
+  stylesheet, and one motion script (_scripts/motion.ts).
 */
 import '../_styles/antara.css';
 import { studio, disclosure } from '../_data/site.ts';
@@ -30,6 +29,27 @@ const year = new Date().getFullYear();
 <!doctype html>
 <html lang="en">
   <head>
+    <!--
+      `js` lets the stylesheet hide things that are about to animate without
+      hiding them from visitors who have no script. `no-loader` skips the
+      opening screen after the first page. `is-vt` marks an arrival by view
+      transition, so the hero skips its opening and the cover can land.
+    -->
+    <script is:inline>
+      (function () {
+        var html = document.documentElement;
+        html.classList.add('js');
+        /* The loader plays once per visit; after that pages open straight onto content */
+        try {
+          if (sessionStorage.getItem('antara-seen')) html.classList.add('no-loader');
+          /* The opening should always open onto the hero, not wherever a reload left off */
+          else if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        } catch (e) {}
+        window.addEventListener('pagereveal', function (e) {
+          if (e.viewTransition) html.classList.add('is-vt', 'no-loader');
+        });
+      })();
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- A concept piece living inside another studio's site; it should not be indexed -->
@@ -43,9 +63,23 @@ const year = new Date().getFullYear();
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <slot name="head" />
   </head>
 
   <body>
+    <!--
+      Opening screen, first page of a visit only. Holds until the typeface and
+      the first photograph are ready, so the hero opens complete rather than
+      assembling itself in front of you.
+    -->
+    <div class="loader" id="loader" aria-hidden="true">
+      <div class="loader-row">
+        <span>{studio.name}</span>
+        <span class="loader-n" id="loader-n">00</span>
+      </div>
+      <div class="loader-bar"><span id="loader-bar"></span></div>
+    </div>
+
     <header class="nav" id="nav">
       <a class="nav-mark" href="/">
         {studio.name} <span>&mdash; {studio.discipline}</span>
@@ -123,58 +157,7 @@ const year = new Date().getFullYear();
     </footer>
 
     <script>
-      /*
-        The entire motion system.
-
-        An IntersectionObserver adds `.in` once, and CSS does the rest — text
-        rises, images wipe. Elements are unobserved as soon as they have played
-        so nothing keeps running behind you.
-      */
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      if (!reduce) {
-        const io = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((e) => {
-              if (!e.isIntersecting) return;
-              e.target.classList.add('in');
-              io.unobserve(e.target);
-            });
-          },
-          { rootMargin: '0px 0px -12% 0px', threshold: 0.08 }
-        );
-
-        document.querySelectorAll('[data-reveal], [data-fig]').forEach((el) => io.observe(el));
-
-        /*
-          Hide the bar going down, show it coming back. Compared against a
-          stored position rather than a scroll direction event, so a rubber-band
-          at the top of the page cannot leave it stuck off screen.
-        */
-        const nav = document.getElementById('nav');
-        let last = window.scrollY;
-        let ticking = false;
-
-        const onScroll = () => {
-          const y = window.scrollY;
-          if (y > 120 && y > last + 6) nav.classList.add('is-up');
-          else if (y < last - 6 || y < 120) nav.classList.remove('is-up');
-          last = y;
-          ticking = false;
-        };
-
-        window.addEventListener(
-          'scroll',
-          () => {
-            if (ticking) return;
-            ticking = true;
-            requestAnimationFrame(onScroll);
-          },
-          { passive: true }
-        );
-      } else {
-        document.querySelectorAll('[data-reveal], [data-fig]').forEach((el) => el.classList.add('in'));
-      }
+      import '../_scripts/motion.ts';
     </script>
   </body>
 </html>

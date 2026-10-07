@@ -18,6 +18,10 @@ export interface Props {
   sizes?: string;
   eager?: boolean;
   class?: string;
+  /* Drift the photograph inside its frame while scrolling */
+  parallax?: boolean;
+  /* Shared-element name for cross-page transitions */
+  transition?: string;
 }
 
 const {
@@ -28,21 +32,28 @@ const {
   sizes = '100vw',
   eager = false,
   class: klass = '',
+  parallax = true,
+  transition,
 } = Astro.props;
 
 const src = assetFor(file);
 ---
 
-<figure class={`fig ${klass}`} style={`aspect-ratio:${ratio}`} data-fig>
+<figure
+  class={`fig ${klass}`}
+  style={`aspect-ratio:${ratio}${transition ? `;view-transition-name:${transition}` : ''}`}
+  data-fig
+  data-parallax={parallax && src ? '' : undefined}
+>
   {src ? (
-    <img
+    <div class="fig-in"><img
       src={src}
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
       fetchpriority={eager ? 'high' : undefined}
       sizes={sizes}
-    />
+    /></div>
   ) : (
     <div class="fig-ph" aria-hidden="true">
       <span>{file}</span>

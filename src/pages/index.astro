@@ -11,25 +11,67 @@ import Base from './_components/Base.astro';
 import Figure from './_components/Figure.astro';
 import { studio, services, numbers, approach, faq } from './_data/site.ts';
 import { projects } from './_data/projects.ts';
+import { assetFor, videoFor } from './_data/assets.ts';
 
-const featured = projects.slice(0, 3);
+/* The hero turns through the garden view and then each project's cover */
+const slides = [
+  { file: 'hero', caption: 'From the garden, late afternoon', href: '/work' },
+  ...projects.map((p) => ({ file: p.cover, caption: `${p.name} — ${p.place}`, href: `/work/${p.slug}` })),
+]
+  .map((s) => ({ ...s, src: assetFor(s.file) }))
+  .filter((s) => s.src);
+
+/*
+  Drop public/video/hero.mp4 (or .webm) in and the hero becomes that film,
+  looping, with hero-poster.webp beside it as the poster — no code change.
+*/
+const film = videoFor('hero');
+/* The poster is the film's own first frame, so the swap to video is invisible */
+const poster = film.length ? '/video/hero-poster.webp' : assetFor('hero');
+
+/* A loose strip of frames for the marquee — spares first, then plates */
+const strip = ['spare-court', 'p2-03', 'spare-verandah', 'p4-03', 'spare-gallery', 'p3-04', 'spare-diptych', 'p5-03']
+  .map((f) => assetFor(f))
+  .filter(Boolean) as string[];
 ---
 
 <Base title="Architecture and interiors" description={studio.line}>
+  {slides[0] && <link slot="head" rel="preload" as="image" href={film.length ? poster : slides[0].src} fetchpriority="high" />}
+
   <!-- Hero -->
-  <section class="hero">
-    <Figure file="hero" ratio="auto" eager alt="" />
+  <section class="hero" data-hero>
+    <div class="hero-media">
+      {film.length > 0 ? (
+        <div class="hero-slide is-on" data-caption={slides[0]?.caption} data-href="/work">
+          <video autoplay muted loop playsinline preload="auto" poster={poster ?? undefined}>
+            {film.map((f) => <source src={f.src} type={f.type} />)}
+          </video>
+        </div>
+      ) : slides.map((sl, i) => (
+        <div class={`hero-slide${i === 0 ? ' is-on' : ''}`} data-caption={sl.caption} data-href={sl.href}>
+          <img
+            src={sl.src}
+            alt=""
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : undefined}
+            decoding="async"
+          />
+        </div>
+      ))}
+    </div>
     <div class="hero-shade"></div>
 
     <div class="hero-copy">
       <div>
-        <p class="label">{studio.discipline} &mdash; {studio.city}</p>
-        <h1 class="display">{studio.line}</h1>
+        <p class="label hero-fade">{studio.discipline} &mdash; {studio.city}</p>
+        <h1 class="display" data-split>{studio.line}</h1>
       </div>
-      <div class="hero-meta">
-        Practising since {studio.founded}<br />
-        Three projects a year<br />
-        Houses, mostly
+      <div class="hero-meta hero-fade" style="--d:0.5s">
+        {film.length === 0 && <div class="hero-count">
+          <span data-slide-n>01</span> <span class="hero-count-of">/ {String(slides.length).padStart(2, '0')}</span>
+        </div>}
+        {film.length === 0 && <div class="hero-bar" aria-hidden="true"></div>}
+        <a class="hero-cap" data-slide-cap href={slides[0]?.href}>{slides[0]?.caption}</a>
       </div>
     </div>
   </section>
@@ -40,7 +82,7 @@ const featured = projects.slice(0, 3);
       <p class="label" data-reveal>The practice</p>
       <div class="body-col">
         {studio.intro.map((p, i) => (
-          <p class="h3" style={i === 0 ? 'color:var(--ink)' : ''} data-reveal data-delay={String(i)}>
+          <p class="h3" style={i === 0 ? 'color:var(--ink)' : 'color:var(--ink-2)'} data-split>
             {p}
           </p>
         ))}
@@ -48,48 +90,77 @@ const featured = projects.slice(0, 3);
     </div>
   </section>
 
-  <!-- Selected work -->
-  <section class="wrap section-tight">
-    <div class="two" style="margin-bottom:clamp(24px,4vh,52px)">
-      <p class="label" data-reveal>Selected work</p>
-      <p class="lede" data-reveal data-delay="1">
-        Five of thirty-one. The rest are private.
-      </p>
-    </div>
+  <!-- Selected work: vertical scroll drives a horizontal track -->
+  <section class="hs" data-hscroll aria-label="Selected work">
+    <div class="hs-sticky">
+      <div class="wrap hs-head">
+        <p class="label">Selected work</p>
+        <p class="hs-count label">
+          <span data-hs-n>01</span> / {String(projects.length).padStart(2, '0')}
+        </p>
+      </div>
 
-    <div class="projects stagger">
-      {featured.map((p, i) => (
-        <a class="pcard" href={`/work/${p.slug}`}>
-          <Figure
-            file={p.cover}
-            ratio={i % 2 === 0 ? '3/2' : '4/3'}
-            caption={`${p.name} — ${p.place}`}
-            class="pcard-fig"
-            alt={`${p.name}, ${p.place}`}
-          />
-          <div class="pcard-row">
-            <h2 class="pcard-name">{p.name}</h2>
-            <span class="pcard-meta">{p.place} &middot; {p.year}</span>
-          </div>
-          <p class="pcard-lede">{p.lede}</p>
+      <div class="hs-track">
+        <div class="hs-intro">
+          <p class="h2" data-split>Five of thirty-one. The rest are private.</p>
+          <p class="muted" data-reveal data-delay="1">
+            Shown with the owners&rsquo; permission.
+          </p>
+        </div>
+
+        {projects.map((p, i) => (
+          <a class={`hs-card ${i % 2 === 0 ? 'is-tall' : 'is-wide'}`} href={`/work/${p.slug}`}>
+            <Figure
+              file={p.cover}
+              ratio={i % 2 === 0 ? '4/5' : '4/3'}
+              alt={`${p.name}, ${p.place}`}
+              parallax={false}
+              transition={`p-${p.slug}`}
+              sizes="(max-width: 900px) 80vw, 40vw"
+            />
+            <div class="pcard-row">
+              <h2 class="pcard-name">
+                <span class="hs-i">{String(i + 1).padStart(2, '0')}</span>{p.name}
+              </h2>
+              <span class="pcard-meta">{p.place} &middot; {p.year}</span>
+            </div>
+            <p class="pcard-lede">{p.lede}</p>
+          </a>
+        ))}
+
+        <a class="hs-end" href="/work">
+          <span class="label">Index</span>
+          <span class="h2">All projects</span>
+          <span class="hs-arrow" aria-hidden="true">&rarr;</span>
         </a>
-      ))}
-    </div>
+      </div>
 
-    <p style="margin-top:clamp(28px,4vh,56px)" data-reveal>
-      <a href="/work" class="h3" style="border-bottom:1px solid var(--line-2)">
-        All projects
-      </a>
-    </p>
+      <div class="wrap">
+        <div class="hs-bar" aria-hidden="true"><span></span></div>
+      </div>
+    </div>
   </section>
+
+  <!-- A loose strip of frames, drifting, pushed along by scroll -->
+  {strip.length > 0 && (
+    <section class="mq" data-marquee aria-hidden="true">
+      <div class="mq-track">
+        {[0, 1].map(() =>
+          strip.map((src, i) => (
+            <div class={`mq-item${i % 3 === 1 ? ' is-low' : ''}`}>
+              <img src={src} alt="" decoding="async" />
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  )}
 
   <!-- What we do -->
   <section class="wrap section">
     <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
       <p class="label" data-reveal>What we do</p>
-      <p class="lede" data-reveal data-delay="1">
-        Four things, and nothing else.
-      </p>
+      <p class="lede" data-split>Four things, and nothing else.</p>
     </div>
 
     <div class="items">
@@ -108,7 +179,9 @@ const featured = projects.slice(0, 3);
     <div class="stats">
       {numbers.map((n, i) => (
         <div class="stat" data-reveal data-delay={String(Math.min(i, 3))}>
-          <div class="stat-v">{n.value}</div>
+          <div class="stat-v">
+            {Number(n.value) < 1000 ? <span data-count={n.value}>{n.value}</span> : n.value}
+          </div>
           <div class="stat-l">{n.label}</div>
         </div>
       ))}
@@ -119,9 +192,7 @@ const featured = projects.slice(0, 3);
   <section class="wrap section">
     <div class="two" style="margin-bottom:clamp(20px,3vh,40px)">
       <p class="label" data-reveal>How we work</p>
-      <p class="lede" data-reveal data-delay="1">
-        The same four steps on every project, in the same order.
-      </p>
+      <p class="lede" data-split>The same four steps on every project, in the same order.</p>
     </div>
 
     <div class="items">

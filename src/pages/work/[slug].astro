@@ -9,7 +9,7 @@
 import Base from '../_components/Base.astro';
 import Figure from '../_components/Figure.astro';
 import { projects } from '../_data/projects.ts';
-import { hasAsset } from '../_data/assets.ts';
+import { hasAsset, assetFor } from '../_data/assets.ts';
 
 export const prerender = true;
 
@@ -33,19 +33,31 @@ const available = project.shots.filter((s) => hasAsset(s.file));
 const heroFile = hasAsset(project.cover) ? project.cover : available[0]?.file;
 const plates = available.filter((s) => s.file !== heroFile);
 const [wide, ...rest] = plates;
+
+const nextCover = assetFor(next.cover);
 ---
 
 <Base title={project.name} current="work" description={project.lede}>
+  {heroFile && assetFor(heroFile) && <link slot="head" rel="preload" as="image" href={assetFor(heroFile)} fetchpriority="high" />}
   <!-- Cover -->
-  <section class="hero">
-    <Figure file={heroFile} ratio="auto" eager alt={`${project.name}, ${project.place}`} />
+  <section class="hero" data-hero>
+    <div class="hero-media">
+      <Figure
+        file={heroFile}
+        ratio="auto"
+        eager
+        parallax={false}
+        transition={heroFile === project.cover ? `p-${project.slug}` : undefined}
+        alt={`${project.name}, ${project.place}`}
+      />
+    </div>
     <div class="hero-shade"></div>
     <div class="hero-copy">
       <div>
-        <p class="label">{project.type} &mdash; {project.place}</p>
-        <h1 class="display">{project.name}</h1>
+        <p class="label hero-fade">{project.type} &mdash; {project.place}</p>
+        <h1 class="display" data-split>{project.name}</h1>
       </div>
-      <div class="hero-meta">
+      <div class="hero-meta hero-fade" style="--d:0.5s">
         {project.status === 'Completed' ? `Completed ${project.year}` : `${project.status}, ${project.year}`}<br />
         {project.area}
       </div>
@@ -55,7 +67,7 @@ const [wide, ...rest] = plates;
   <!-- The piece -->
   <section class="wrap section">
     <div class="two">
-      <p class="lede" data-reveal>{project.lede}</p>
+      <p class="lede" data-split>{project.lede}</p>
       <div class="body-col">
         {project.brief.map((p, n) => (
           <p data-reveal data-delay={String(Math.min(n, 3))}>{p}</p>
@@ -99,8 +111,8 @@ const [wide, ...rest] = plates;
     </div>
   </section>
 
-  <!-- Pager -->
-  <section class="wrap">
+  <!-- Pager: the next house, as a band you walk into -->
+  <section class="wrap section-tight">
     <div class="pager">
       <a href={`/work/${prev.slug}`}>
         <span class="label">Previous</span>
@@ -111,5 +123,18 @@ const [wide, ...rest] = plates;
         <span class="h3">{next.name}</span>
       </a>
     </div>
+
+    {nextCover && (
+      <a class="next" href={`/work/${next.slug}`} data-fig>
+        <div class="next-media" data-parallax>
+          <div class="fig-in"><img src={nextCover} alt="" loading="lazy" decoding="async" /></div>
+        </div>
+        <div class="next-copy">
+          <span class="label">Next project</span>
+          <span class="h2">{next.name}</span>
+          <span class="next-meta">{next.place} &middot; {next.year}</span>
+        </div>
+      </a>
+    )}
   </section>
 </Base>

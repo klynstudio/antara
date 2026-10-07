@@ -12,9 +12,7 @@ const ordered = [...projects].sort((a, b) => b.year - a.year);
 <Base title="Projects" current="work" description="Houses and interiors by Antara.">
   <section class="wrap" style="padding-top:clamp(110px,16vh,190px)">
     <p class="label" data-reveal>Projects</p>
-    <h1 class="display" data-reveal data-delay="1" style="margin-top:14px;max-width:14ch">
-      Thirty-one houses. Five of them here.
-    </h1>
+    <h1 class="display" data-split style="margin-top:14px;max-width:14ch">Thirty-one houses. Five of them here.</h1>
     <p data-reveal data-delay="2" class="muted" style="margin-top:22px;max-width:52ch">
       Most of our work is private and stays that way. These five are shown with
       the owners&rsquo; permission and cover the range &mdash; a house on a narrow
@@ -33,6 +31,7 @@ const ordered = [...projects].sort((a, b) => b.year - a.year);
             class="pcard-fig"
             alt={`${p.name}, ${p.place}`}
             eager={i === 0}
+            transition={`p-${p.slug}`}
           />
           <div class="pcard-row">
             <h2 class="pcard-name">{p.name}</h2>

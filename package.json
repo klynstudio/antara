@@ -3,7 +3,9 @@
   "type": "module",
   "version": "1.0.0",
   "private": false,
-  "engines": { "node": ">=20.0.0" },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -11,6 +13,7 @@
     "images": "python3 scripts/build-images.py"
   },
   "dependencies": {
-    "astro": "^6.2.1"
+    "astro": "^6.2.1",
+    "lenis": "^1.3.26"
   }
 }
